@@ -25,7 +25,13 @@ abstract class AbstractFunctionalDatabaseTest extends \PHPUnit_Framework_TestCas
     protected $pdo;
 
     protected function setUp () {
-        $this->pdo = new \PDO('mysql:host='.self::CONFIG['host'].';', self::CONFIG['user'], self::CONFIG['password']);
+        try {
+            $this->pdo = new \PDO('mysql:host='.self::CONFIG['host'].';',
+                                  self::CONFIG['user'],
+                                  self::CONFIG['password']);
+        } catch (\Exception $e) {
+            $this->fail('please set a valid database connection for tests in this file!');
+        }
         $this->pdo->exec('DROP SCHEMA IF EXISTS '.self::CONFIG['database']);
         $this->pdo->exec('CREATE SCHEMA '.self::CONFIG['database']);
         $this->pdo->exec('USE '.self::CONFIG['database']);
