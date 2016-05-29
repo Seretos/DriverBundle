@@ -363,7 +363,7 @@ class MysqliStatement extends MysqliWrapper implements StatementInterface {
         if (isset($regexParams[0]) && is_array($regexParams[0])) {
             $this->parameters = $regexParams[0];
             foreach ($this->parameters as $param) {
-                $sql = str_replace($param, '?', $sql);
+                $sql = preg_replace('/:\b'.str_replace(':', '', $param).'\b/', '?', $sql);
                 $this->values[$param] = null;
                 $this->_types[$param] = self::PARAM_TYPES[PDO::PARAM_STR];
             }

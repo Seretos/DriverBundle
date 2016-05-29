@@ -281,6 +281,24 @@ class MysqliStatementTest extends PHPUnit_Framework_TestCase {
     /**
      * @test
      */
+    public function prepare_withSimilarSqlParameters () {
+        $this->assertSame('SELECT * FROM parameter WHERE param1 = ? AND param2 = ? AND param3 = ? AND param4 = ?',
+                          $this->reflectionMethod('prepare',
+                                                  ['SELECT * FROM parameter WHERE param1 = :param1 AND param2 = :param1 AND param3 = :param10 AND param4 = :param100']));
+
+        $this->assertSame([':param1', ':param1', ':param10', ':param100'],
+                          $this->reflectionGetProperty('parameters'));
+
+        $this->assertSame([':param1' => null, ':param10' => null, ':param100' => null],
+                          $this->reflectionGetProperty('values'));
+
+        $this->assertSame([':param1' => 's', ':param10' => 's', ':param100' => 's'],
+                          $this->reflectionGetProperty('_types'));
+    }
+
+    /**
+     * @test
+     */
     public function execute_withoutArguments () {
         $this->statementMock = $this->createRealStatementMock();
 
