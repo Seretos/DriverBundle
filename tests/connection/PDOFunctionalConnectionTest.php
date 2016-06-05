@@ -11,9 +11,11 @@ use database\DriverBundle\tests\connection\AbstractFunctionalConnectionTest;
 class PDOFunctionalConnectionTest extends AbstractFunctionalConnectionTest {
     protected function setUp () {
         parent::setUp();
-        $this->connection = new PdoConnection(self::CONFIG['host'],
-                                              self::CONFIG['user'],
-                                              self::CONFIG['password'],
-                                              self::CONFIG['database']);
+        $this->connection = $this->getFactory()
+                                 ->createPdoConnection(self::CONFIG['host'],
+                                                       self::CONFIG['user'],
+                                                       self::CONFIG['password'],
+                                                       self::CONFIG['database']);
+        $this->assertInstanceOf(PdoConnection::class, $this->connection);
     }
 }

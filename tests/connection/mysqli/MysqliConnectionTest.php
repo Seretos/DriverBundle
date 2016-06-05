@@ -114,7 +114,8 @@ class MysqliConnectionTest extends PHPUnit_Framework_TestCase {
                        ->method('getConnectionErrorNumber')
                        ->will($this->returnValue(4));
 
-        $this->setExpectedExceptionRegExp(ConnectionException::class);
+        $mockConnection->beginTransaction();
+        $this->setExpectedExceptionRegExp(ConnectionException::class, '/test/', 4);
         $mockConnection->commit();
     }
 

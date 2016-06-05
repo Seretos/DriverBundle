@@ -65,4 +65,9 @@ interface ConnectionInterface {
      * @return boolean
      */
     public function inTransaction ();
+
+    /**
+     * @return int
+     */
+    public function getConnectionId ();
 }

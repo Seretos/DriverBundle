@@ -24,15 +24,20 @@ Usage
 =====
 you can create a mysqli or an pdo connection, and use the [ConnectionInterface](connection/interfaces/ConnectionInterface.php) / [StatementInterface](connection/interfaces/StatementInterface.php) for both types
 
-create a mysqli connection
+convert a mysqli connection
 ```php
+$driverFactory = new DriverBundleFactory();
 $mysqli = new mysqli($host,$user,$password,$database);
 
-$this->connection = new MysqliConnection($mysqli);
+//convert mysqli to MysqliConnection
+$this->connection = $driverBundleFactory->convertMysqli($mysqli);
+
+//create a new MysqliConnection
+$this->connection = $driverBundleFactory->createMysqliConnection('127.0.0.1','user','password','dbname',3306);
 ```
 create a pdo connection
 ```php
-$this->connection = new PdoConnection($host,$user,$password,$database);
+$this->connection = $driverFactory->createPdoConnection($host,$user,$password,$database,3306);
 ```
 
 create a statement:
@@ -74,4 +79,5 @@ Road map
 ========
 the following features are not implemented but required for version 1.0
 
-* normalized exception handling for timeout, deadlock, duplicate key (problem: how to test it?)
+* performance tests
+* extended exception tests (how to test it?)

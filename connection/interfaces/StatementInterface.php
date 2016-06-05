@@ -28,6 +28,11 @@ interface StatementInterface extends \Iterator {
     public function rowCount ();
 
     /**
+     * @return boolean
+     */
+    public function free ();
+
+    /**
      * @param      $key
      * @param      $variable
      * @param null $type

@@ -1,6 +1,8 @@
 <?php
 namespace database\DriverBundle\tests\connection;
 
+use database\DriverBundle\connection\exception\ConnectionException;
+use database\DriverBundle\factory\DriverBundleFactory;
 use database\DriverBundle\tests\AbstractFunctionalDatabaseTest;
 use PDO;
 
@@ -12,14 +14,31 @@ use PDO;
  */
 abstract class AbstractFunctionalConnectionTest extends AbstractFunctionalDatabaseTest {
     /**
+     * @var DriverBundleFactory
+     */
+    private $factory;
+
+    protected function setUp () {
+        parent::setUp();
+        $this->factory = new DriverBundleFactory();
+    }
+
+    /**
+     * @return DriverBundleFactory
+     */
+    protected function getFactory () {
+        return $this->factory;
+    }
+
+    /**
      * @test
      */
     public function exec () {
-        $this->assertSame(1, $this->connection->exec('INSERT INTO example1(info) VALUES(\'query_insert\')'));
-        $this->assertSame(1, $this->connection->exec('INSERT INTO example1(info) VALUES(\'query_insert\')'));
-        $this->assertSame(2,
+        $this->assertSame(true, $this->connection->exec('INSERT INTO example1(info) VALUES(\'query_insert\')'));
+        $this->assertSame(true, $this->connection->exec('INSERT INTO example1(info) VALUES(\'query_insert\')'));
+        $this->assertSame(true,
                           $this->connection->exec('UPDATE example1 SET info = \'query_insert2\' WHERE info = \'query_insert\''));
-        $this->assertSame(2,
+        $this->assertSame(true,
                           $this->connection->exec('DELETE FROM example1 WHERE info = \'query_insert2\''));
     }
 
@@ -182,18 +201,17 @@ abstract class AbstractFunctionalConnectionTest extends AbstractFunctionalDataba
         $statement = $this->connection->query('INSERT INTO example1(info) VALUES(\'query_insert\')');
         $this->assertSame(1, $statement->rowCount());
         $this->assertSame(0, $statement->columnCount());
-        $this->assertEquals(51, $this->connection->lastInsertId());
-
-        $statement = $this->connection->query('SELECT * FROM example1 WHERE id = 51');
+        $this->assertNotEquals(0, $this->connection->lastInsertId());
+        $id = $this->connection->lastInsertId();
+        $statement = $this->connection->query('SELECT * FROM example1 WHERE id = '.$id);
         $this->assertSame(1, $statement->rowCount());
         $this->assertSame(2, $statement->columnCount());
 
-        $statement = $this->pdo->query('SELECT * FROM example1 WHERE id = 51');
+        $statement = $this->pdo->query('SELECT * FROM example1 WHERE id = '.$id);
         $this->assertSame(0, $statement->rowCount());
 
         $this->assertSame(true, $this->connection->commit());
-
-        $statement = $this->pdo->query('SELECT * FROM example1 WHERE id = 51');
+        $statement = $this->pdo->query('SELECT * FROM example1 WHERE id = '.$id);
         $this->assertSame(1, $statement->rowCount());
         $this->assertSame(2, $statement->columnCount());
     }
@@ -242,5 +260,51 @@ abstract class AbstractFunctionalConnectionTest extends AbstractFunctionalDataba
         $statement->execute();
         rewind($fp);
         $this->assertEquals(['id' => 51, 'info' => stream_get_contents($fp)], $statement->fetch(PDO::FETCH_ASSOC));
+    }
+
+    /**
+     * @test
+     */
+    public function free () {
+        $statement = $this->connection->prepare('SELECT * FROM example1 WHERE id < :param');
+        $statement->bindValue('param', 3);
+        $statement->execute();
+        $this->assertEquals(['id' => 1, 0 => 1, 'info' => 'test0', 1 => 'test0'], $statement->current());
+        $this->assertSame(true, $statement->free());
+        $statement->next();
+        $this->assertEquals(false, $statement->current());
+    }
+
+    /**
+     * @test
+     */
+    public function serverError () {
+        $this->connection->exec('LOCK TABLE example1 READ');
+        try {
+            $stmt = $this->connection->prepare('SELECT * FROM example1 AS e1');
+            $stmt->execute();
+        } catch (ConnectionException $e) {
+            $this->assertContains('Table \'e1\' was not locked with LOCK TABLES', $e->getMessage());
+            $this->assertSame(1100, $e->getCode());
+        }
+        $this->connection->exec('UNLOCK TABLES');
+    }
+
+    /**
+     * @test
+     */
+    public function getConnectionId () {
+        $statement = $this->connection->prepare('SELECT CONNECTION_ID() AS id');
+        $statement->execute();
+        $statement->setFetchMode(PDO::FETCH_NUM);
+        $this->assertEquals($this->connection->getConnectionId(), $statement->current()[0]);
+    }
+
+    /**
+     * @test
+     */
+    public function commit_withoutTransaction () {
+        $this->setExpectedExceptionRegExp(ConnectionException::class, '/There is no active transaction/', 0);
+        $this->connection->commit();
     }
 }

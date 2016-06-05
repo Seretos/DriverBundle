@@ -82,6 +82,19 @@ class MysqliStatement extends MysqliWrapper implements StatementInterface {
         }
     }
 
+//    public function __destruct () {
+//        $this->free();
+//    }
+
+    public function free () {
+        if ($this->_result instanceof \mysqli_result) {
+            $this->_result->free_result();
+            //$this->_result = null;
+        }
+
+        return true;
+    }
+
     /**
      * Return the current element
      * @link  http://php.net/manual/en/iterator.current.php
@@ -223,21 +236,27 @@ class MysqliStatement extends MysqliWrapper implements StatementInterface {
     public function fetch ($type = null) {
         if ($this->noResultException()) {
             $type = $this->getFetchMode($type);
-            switch ($type) {
-                case PDO::FETCH_BOTH:
-                    return $this->_result->fetch_array();
-                    break;
-                case PDO::FETCH_ASSOC:
-                    return $this->_result->fetch_assoc();
-                    break;
-                case PDO::FETCH_NUM:
-                    return $this->_result->fetch_array(MYSQLI_NUM);
-                    break;
-                case PDO::FETCH_OBJ:
-                    return $this->_result->fetch_object();
-                    break;
+            try {
+                switch ($type) {
+                    case PDO::FETCH_BOTH:
+                        return $this->_result->fetch_array();
+                        break;
+                    case PDO::FETCH_ASSOC:
+                        return $this->_result->fetch_assoc();
+                        break;
+                    case PDO::FETCH_NUM:
+                        return $this->_result->fetch_array(MYSQLI_NUM);
+                        break;
+                    case PDO::FETCH_OBJ:
+                        return $this->_result->fetch_object();
+                        break;
+                }
+            } catch (\Exception $e) {
+                //required for compatibility to pdo :(
+                return false;
             }
         }
+
         throw new ConnectionException('invalid fetch type!');
     }
 

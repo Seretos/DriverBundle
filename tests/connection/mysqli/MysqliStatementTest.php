@@ -253,13 +253,6 @@ class MysqliStatementTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('test', $this->reflectionMethod('prepare', ['test']));
     }
 
-    private function reflectionGetProperty ($name) {
-        $reflectionProperty = $this->statementReflection->getProperty($name);
-        $reflectionProperty->setAccessible(true);
-
-        return $reflectionProperty->getValue($this->statementMock);
-    }
-
     /**
      * @test
      */
@@ -330,7 +323,7 @@ class MysqliStatementTest extends PHPUnit_Framework_TestCase {
 
         $this->createMysqliStatementExecuteMock(false);
 
-        $this->setExpectedExceptionRegExp(ConnectionException::class);
+        $this->setExpectedExceptionRegExp(ConnectionException::class, '/test/', 4);
         $this->statementMock->execute();
     }
 
@@ -487,6 +480,35 @@ class MysqliStatementTest extends PHPUnit_Framework_TestCase {
         $this->assertSame([':param1' => 'value3', ':param2' => 'value2'], $this->reflectionGetProperty('values'));
 
         unset($param1);
+    }
+
+    /**
+     * @test
+     */
+    public function free () {
+        $this->statementMock = $this->createRealStatementMock();
+
+        $result = $this->getMockBuilder(mysqli_result::class)
+                       ->disableOriginalConstructor()
+                       ->getMock();
+
+        $result->expects($this->once())
+               ->method('free_result');
+
+        $this->reflectionSetProperty('_result', $result);
+
+        $this->statementMock->free();
+    }
+
+    /**
+     * @test
+     */
+    public function free_withoutStatement () {
+        $this->statementMock = $this->createRealStatementMock();
+
+        $this->reflectionSetProperty('_statement', null);
+
+        $this->statementMock->free();
     }
 
     /**
@@ -683,6 +705,13 @@ class MysqliStatementTest extends PHPUnit_Framework_TestCase {
         $this->assertSame(2, $this->reflectionMethod('getFetchMode', [null]));
         $this->assertSame(0, $this->reflectionMethod('getFetchMode', [0]));
         $this->assertSame(3, $this->reflectionMethod('getFetchMode', [3]));
+    }
+
+    private function reflectionGetProperty ($name) {
+        $reflectionProperty = $this->statementReflection->getProperty($name);
+        $reflectionProperty->setAccessible(true);
+
+        return $reflectionProperty->getValue($this->statementMock);
     }
 
     private function createFetchModeMock ($method, $param = null) {

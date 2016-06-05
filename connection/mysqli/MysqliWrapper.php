@@ -33,6 +33,16 @@ abstract class MysqliWrapper {
         $this->_statement = null;
     }
 
+    public function __destruct () {
+        $this->_connection = null;
+        $this->_result = null;
+        $this->_statement = null;
+    }
+
+    public function getConnectionId () {
+        return $this->_connection->thread_id;
+    }
+
     protected function getConnectionError () {
         return $this->_connection->error;
     }

@@ -36,14 +36,12 @@ class MysqliConnection extends MysqliWrapper implements ConnectionInterface {
     /**
      * @param $sql
      *
-     * @return int
-     * @throws \database\DriverBundle\connection\exception\ConnectionException
+     * @return bool
      */
     public function exec ($sql) {
-        $statement = new MysqliStatement($this->_connection, $sql);
-        $statement->execute();
+        $this->_connection->query($sql);
 
-        return $statement->rowCount();
+        return true;
     }
 
     /**
@@ -80,6 +78,9 @@ class MysqliConnection extends MysqliWrapper implements ConnectionInterface {
      * @throws ConnectionException
      */
     public function commit () {
+        if (!$this->inTransaction) {
+            throw new ConnectionException('There is no active transaction', 0);
+        }
         $this->inTransaction = false;
 
         if (!$this->_connection->commit()) {

@@ -1,7 +1,7 @@
 <?php
 use database\DriverBundle\connection\exception\ConnectionException;
-use database\DriverBundle\tests\connection\AbstractFunctionalConnectionTest;
 use database\DriverBundle\connection\mysqli\MysqliConnection;
+use database\DriverBundle\tests\connection\AbstractFunctionalConnectionTest;
 
 /**
  * Created by PhpStorm.
@@ -17,7 +17,22 @@ class MysqliFunctionalConnectionTest extends AbstractFunctionalConnectionTest {
                              self::CONFIG['password'],
                              self::CONFIG['database']);
 
-        $this->connection = new MysqliConnection($mysqli);
+        $this->connection = $this->getFactory()
+                                 ->convertMysqli($mysqli);
+        $this->assertInstanceOf(MysqliConnection::class, $this->connection);
+    }
+
+    /**
+     * @test
+     */
+    public function secondConnection () {
+        $connection2 = $this->getFactory()
+                            ->createMysqliConnection(self::CONFIG['host'],
+                                                     self::CONFIG['user'],
+                                                     self::CONFIG['password'],
+                                                     self::CONFIG['database']);
+        $this->assertNotSame($this->connection, $connection2);
+        $this->assertInstanceOf(MysqliConnection::class, $connection2);
     }
 
     /**

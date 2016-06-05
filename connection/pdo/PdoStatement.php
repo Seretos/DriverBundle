@@ -9,6 +9,7 @@
 namespace database\DriverBundle\connection\pdo;
 
 
+use database\DriverBundle\connection\exception\ConnectionException;
 use database\DriverBundle\connection\interfaces\StatementInterface;
 
 class PdoStatement implements StatementInterface {
@@ -31,25 +32,24 @@ class PdoStatement implements StatementInterface {
     }
 
     /**
-     * Return the current element
-     * @link  http://php.net/manual/en/iterator.current.php
-     * @return mixed Can return any type.
-     * @since 5.0.0
+     * @return mixed
      */
     public function current () {
         return $this->loadCurrent();
     }
 
     /**
-     * Move forward to next element
-     * @link  http://php.net/manual/en/iterator.next.php
      * @return mixed
-     * @since 5.0.0
+     * @throws ConnectionException
      */
     public function next () {
         $this->index++;
+        $current = $this->loadCurrent();
+//        if ($current == false) {
+//            throw new ConnectionException('couldn\'t fetch result');
+//        }
 
-        return $this->loadCurrent();
+        return $current;
     }
 
     /**
@@ -87,13 +87,30 @@ class PdoStatement implements StatementInterface {
         $this->index = 0;
     }
 
+
+    public function free () {
+        if ($this->_statement instanceof \PDOStatement) {
+            $this->cache = [];
+            $this->_statement->closeCursor();
+        }
+
+        return true;
+    }
+
     /**
      * @param null|array $parameters
      *
-     * @return boolean
+     * @return bool
+     * @throws ConnectionException
      */
     public function execute ($parameters = null) {
-        return $this->_statement->execute($parameters);
+        try {
+            return $this->_statement->execute($parameters);
+        } catch (\PDOException $e) {
+            throw new ConnectionException($e->getMessage(),
+                                          $this->_statement->errorInfo()[PdoConnection::ERROR_ARRAY_INDEX],
+                                          $e);
+        }
     }
 
     /**
