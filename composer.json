@@ -1,5 +1,5 @@
 {
-  "name": "Seretos/database/DriverBundle",
+  "name": "LimetecBiotechnologies/database/DriverBundle",
   "description": "This bundle normalize the differences between mysqli and pdo.",
   "keywords": [
     "mysqli",

@@ -12,6 +12,9 @@ use database\DriverBundle\connection\exception\ConnectionException;
 use database\DriverBundle\connection\interfaces\ConnectionInterface;
 
 class MysqliConnection extends MysqliWrapper implements ConnectionInterface {
+    /**
+     * @var bool
+     */
     private $inTransaction;
 
     /**

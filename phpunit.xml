@@ -4,11 +4,10 @@
 <phpunit backupGlobals="false"
          colors="true">
     <testsuites>
-        <testsuite name="mysqli connection unit tests">
-            <file>tests/connection/mysqli/MysqliStatementTest.php</file>
-            <file>tests/connection/mysqli/MysqliConnectionTest.php</file>
+        <testsuite name="mysqli driver unit tests">
+            <directory>tests/connection/mysqli</directory>
         </testsuite>
-        <testsuite name="connection functional tests">
+        <testsuite name="driver functional tests">
             <file>tests/connection/MysqliFunctionalConnectionTest.php</file>
             <file>tests/connection/PDOFunctionalConnectionTest.php</file>
         </testsuite>

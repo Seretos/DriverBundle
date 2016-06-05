@@ -82,14 +82,12 @@ class MysqliStatement extends MysqliWrapper implements StatementInterface {
         }
     }
 
-//    public function __destruct () {
-//        $this->free();
-//    }
-
+    /**
+     * @return bool
+     */
     public function free () {
         if ($this->_result instanceof \mysqli_result) {
             $this->_result->free_result();
-            //$this->_result = null;
         }
 
         return true;

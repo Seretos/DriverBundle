@@ -8,7 +8,7 @@ add the bundle in your composer.json as bellow:
 ```js
 "require": {
     ...
-    ,"Seretos/database/DriverBundle" : "v0.2.*"
+    ,"LimetecBiotechnologies/database/DriverBundle" : "v0.2.*"
 },
 "repositories" : [
     ...

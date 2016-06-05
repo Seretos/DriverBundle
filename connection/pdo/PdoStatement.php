@@ -45,9 +45,6 @@ class PdoStatement implements StatementInterface {
     public function next () {
         $this->index++;
         $current = $this->loadCurrent();
-//        if ($current == false) {
-//            throw new ConnectionException('couldn\'t fetch result');
-//        }
 
         return $current;
     }
