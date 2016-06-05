@@ -12,7 +12,7 @@ namespace database\DriverBundle\tests;
 use database\DriverBundle\connection\interfaces\ConnectionInterface;
 
 abstract class AbstractFunctionalDatabaseTest extends \PHPUnit_Framework_TestCase {
-    const CONFIG = ['host' => '192.168.56.101', 'user' => 'labaccess', 'password' => 'la333ss', 'database' => 'test'];
+    const CONFIG = ['host' => '127.0.0.1', 'user' => 'root', 'password' => '', 'database' => 'test'];
 
     /**
      * @var ConnectionInterface
