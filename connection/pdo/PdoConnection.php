@@ -40,7 +40,7 @@ class PdoConnection extends \PDO implements ConnectionInterface {
      *
      * @return PdoStatement
      */
-    public function prepare ($sql) {
+    public function prepare ($sql, $option = null) {
         $statement = new PdoStatement(parent::prepare($sql, []));
 
         return $statement;
