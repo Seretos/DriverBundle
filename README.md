@@ -80,6 +80,7 @@ Road map
 the following features are not implemented but required for version 1.0
 
 * capsule pdo in an variable (PdoConnection)
+* debug logging for queries
 * performance tests
 * extended exception tests (how to test it?)
 * extended blob tests
