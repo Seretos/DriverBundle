@@ -6,6 +6,7 @@
     <testsuites>
         <testsuite name="mysqli driver unit tests">
             <directory>tests/connection/mysqli</directory>
+            <directory>tests/connection/pdo</directory>
         </testsuite>
         <testsuite name="driver functional tests">
             <file>tests/connection/MysqliFunctionalConnectionTest.php</file>

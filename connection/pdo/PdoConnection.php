@@ -14,25 +14,17 @@ use database\DriverBundle\connection\interfaces\ConnectionInterface;
 use PDO;
 use PDOException;
 
-class PdoConnection extends \PDO implements ConnectionInterface {
+class PdoConnection implements ConnectionInterface {
     const ERROR_ARRAY_INDEX = 1;
 
+    private $pdo;
     private $connectionId;
 
-    /**
-     * PdoConnection constructor.
-     *
-     * @param $host
-     * @param $user
-     * @param $password
-     * @param $database
-     * @param $port
-     */
-    public function __construct ($host, $user, $password, $database, $port = 3306) {
-        parent::__construct('mysql:host='.$host.';port='.$port.';dbname='.$database, $user, $password);
-        $this->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $this->connectionId = (int) $this->query('SELECT CONNECTION_ID() AS id')
-                                         ->fetch(PDO::FETCH_ASSOC)['id'];
+    public function __construct (PDO $pdo) {
+        $this->pdo = $pdo;
+        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $this->connectionId = (int) $this->pdo->query('SELECT CONNECTION_ID() AS id')
+                                              ->fetch(PDO::FETCH_ASSOC)['id'];
     }
 
     /**
@@ -40,8 +32,8 @@ class PdoConnection extends \PDO implements ConnectionInterface {
      *
      * @return PdoStatement
      */
-    public function prepare ($sql, $option = null) {
-        $statement = new PdoStatement(parent::prepare($sql, []));
+    public function prepare ($sql) {
+        $statement = new PdoStatement($this->pdo->prepare($sql, []));
 
         return $statement;
     }
@@ -64,7 +56,7 @@ class PdoConnection extends \PDO implements ConnectionInterface {
      * @return bool
      */
     public function exec ($statement) {
-        parent::exec($statement);
+        $this->pdo->exec($statement);
 
         return true;
     }
@@ -75,13 +67,50 @@ class PdoConnection extends \PDO implements ConnectionInterface {
      */
     public function commit () {
         try {
-            return parent::commit();
+            return $this->pdo->commit();
         } catch (PDOException $e) {
-            throw new ConnectionException($e->getMessage(), $this->errorInfo()[self::ERROR_ARRAY_INDEX], $e);
+            throw new ConnectionException($e->getMessage(), $this->pdo->errorInfo()[self::ERROR_ARRAY_INDEX], $e);
         }
     }
 
     public function getConnectionId () {
         return $this->connectionId;
+    }
+
+    /**
+     * @param string $string
+     *
+     * @return string
+     */
+    public function quote ($string) {
+        return $this->pdo->quote($string);
+    }
+
+    /**
+     * @return int
+     */
+    public function lastInsertId () {
+        return $this->pdo->lastInsertId();
+    }
+
+    /**
+     * @return boolean
+     */
+    public function beginTransaction () {
+        return $this->pdo->beginTransaction();
+    }
+
+    /**
+     * @return boolean
+     */
+    public function rollBack () {
+        return $this->pdo->rollBack();
+    }
+
+    /**
+     * @return boolean
+     */
+    public function inTransaction () {
+        return $this->pdo->inTransaction();
     }
 }

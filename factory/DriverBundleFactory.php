@@ -23,7 +23,9 @@ class DriverBundleFactory {
      * @return PdoConnection
      */
     public function createPdoConnection ($host, $user, $password, $database, $port = 3306) {
-        return new PdoConnection($host, $user, $password, $database, $port);
+        $pdo = new \PDO('mysql:host='.$host.';port='.$port.';dbname='.$database, $user, $password);
+
+        return $this->convertPdo($pdo);
     }
 
     /**
@@ -38,7 +40,7 @@ class DriverBundleFactory {
     public function createMysqliConnection ($host, $user, $password, $database, $port = 3306) {
         $mysqli = new \mysqli($host, $user, $password, $database, $port);
 
-        return new MysqliConnection($mysqli);
+        return $this->convertMysqli($mysqli);
     }
 
     /**
@@ -48,5 +50,14 @@ class DriverBundleFactory {
      */
     public function convertMysqli (\mysqli $connection) {
         return new MysqliConnection($connection);
+    }
+
+    /**
+     * @param \PDO $connection
+     *
+     * @return PdoConnection
+     */
+    public function convertPdo (\PDO $connection) {
+        return new PdoConnection($connection);
     }
 }

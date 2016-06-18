@@ -12,13 +12,11 @@ use database\DriverBundle\tests\connection\AbstractFunctionalConnectionTest;
 class MysqliFunctionalConnectionTest extends AbstractFunctionalConnectionTest {
     protected function setUp () {
         parent::setUp();
-        $mysqli = new mysqli(self::CONFIG['host'],
-                             self::CONFIG['user'],
-                             self::CONFIG['password'],
-                             self::CONFIG['database']);
-
         $this->connection = $this->getFactory()
-                                 ->convertMysqli($mysqli);
+                                 ->createMysqliConnection(self::CONFIG['host'],
+                                                          self::CONFIG['user'],
+                                                          self::CONFIG['password'],
+                                                          self::CONFIG['database']);
         $this->assertInstanceOf(MysqliConnection::class, $this->connection);
     }
 
